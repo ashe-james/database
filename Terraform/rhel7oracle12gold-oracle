@@ -1,0 +1,70 @@
+#  Uses /backup (sdc) snap: snap-0e5b6766079dba4e8
+
+#  Variables
+
+GRID_HOME=/u01/app/grid/12.2.0.1
+ORACLE_HOME=/u01/app/oracle/product/12.2.0.1/db
+STAGE=/backup
+
+
+#  grid infrastructure
+
+mkdir -p $GRID_HOME
+
+unzip $STAGE/linuxx64_12201_grid_home.zip -d $GRID_HOME
+
+CHANGEARRAY=(
+    INVENTORY_LOCATION=/u01/app/oraInventory
+    oracle.install.option=CRS_SWONLY
+    ORACLE_BASE=/u01/app/oracle
+    ORACLE_HOME=$GRID_HOME
+    oracle.install.asm.OSDBA=dba
+    oracle.install.asm.OSOPER=dba
+    oracle.install.asm.OSASM=dba
+)
+
+GRID_RSP=$GRID_HOME/inventory/response/grid_install.rsp
+
+for C in "${CHANGEARRAY[@]}"; do 
+        O=$( echo $C | cut -d '=' -f1 )=
+        U=$( echo $C | sed 's/\//\\\//g' )
+	if ( ! grep -q "^$U" $GRID_RSP ); then
+        	sed -i "s/$O/$U/g" $GRID_RSP
+	fi
+done
+
+$GRID_HOME/gridSetup.sh -silent -responseFile $GRID_RSP
+
+
+#  database
+
+mkdir -p $ORACLE_HOME
+
+STAGE_db=$STAGE/database
+
+CHANGEARRAY=(
+    oracle.install.option=INSTALL_DB_SWONLY
+    UNIX_GROUP_NAME=oinstall
+    INVENTORY_LOCATION=/u01/app/oraInventory
+    ORACLE_HOME=$ORACLE_HOME
+    ORACLE_BASE=/u01/app/oracle
+    oracle.install.db.InstallEdition=EE
+    oracle.install.db.OSDBA_GROUP=dba
+    oracle.install.db.OSOPER_GROUP=dba
+    oracle.install.db.OSBACKUPDBA_GROUP=dba
+    oracle.install.db.OSDGDBA_GROUP=dba
+    oracle.install.db.OSKMDBA_GROUP=dba
+    oracle.install.db.OSRACDBA_GROUP=dba
+)
+
+DB_RSP=$STAGE_db/response/db_install.rsp
+
+for C in "${CHANGEARRAY[@]}"; do 
+        O=$( echo $C | cut -d '=' -f1 )=
+        U=$( echo $C | sed 's/\//\\\//g' )
+	if ( ! grep -q "^$U" $DB_RSP ); then
+        	sed -i "s/$O/$U/g" $DB_RSP
+	fi
+done
+
+$STAGE_db/runInstaller -silent -responseFile $DB_RSP

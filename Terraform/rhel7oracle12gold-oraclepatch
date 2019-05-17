@@ -1,0 +1,31 @@
+#  Uses /backup (sdc) snap: snap-0e5b6766079dba4e8
+
+#  Variables
+
+GRID_HOME=/u01/app/grid/12.2.0.1
+ORACLE_HOME=/u01/app/oracle/product/12.2.0.1/db
+STAGE=/backup
+
+PSU_grid=28828733
+PSU_dbcombo=28980102
+PSU_db=28822515
+PSU_java=28790651
+
+
+#  patching
+
+unzip -o $STAGE/p${PSU_grid}_122010_Linux-x86-64.zip -d $STAGE
+unzip -o $STAGE/p${PSU_dbcombo}_122010_Linux-x86-64.zip -d $STAGE
+
+mv $GRID_HOME/OPatch $GRID_HOME/OPatch_$( date '+%Y%m%d' )
+unzip -o $STAGE/p6880880_122010_Linux-x86-64.zip -d $GRID_HOME
+read -p "Execute the following as ROOT: $GRID_HOME/OPatch/opatchauto apply $STAGE/$PSU_grid -oh $GRID_HOME"
+
+mv $ORACLE_HOME/OPatch $ORACLE_HOME/OPatch_$( date '+%Y%m%d' )
+unzip -o $STAGE/p6880880_122010_Linux-x86-64.zip -d $ORACLE_HOME
+
+export PATH=$ORACLE_HOME/OPatch:$PATH
+cd $STAGE/$PSU_dbcombo/$PSU_db
+opatch apply -silent
+cd $STAGE/$PSU_dbcombo/$PSU_java
+opatch apply -silent
