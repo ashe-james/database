@@ -1,0 +1,23 @@
+#!/bin/bash
+
+. ${HOME}/.bash_profile > /dev/null
+
+if [ ${#LOG_DIR} -eq 0 ]; then
+   echo Incorrect Environment Variables
+   exit 0
+fi
+
+LOGFILE=$( find $LOG_DIR -maxdepth 1 -type f -name "run_it.full_expdp*.log" -mtime -$((60*30)) -printf "%p\n" | sed 's|^./||' | sort -nr | head -1 )
+
+if [ ${#LOGFILE} -eq 0 ]; then
+  echo Cronjob Execution Failed
+  exit 0
+fi
+
+grep "successfully completed at" $LOGFILE > /dev/null
+
+if [ $? -eq 0 ]; then
+   echo Success
+else
+   echo Data Pump Execution Failed
+fi
