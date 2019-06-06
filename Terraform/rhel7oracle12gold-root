@@ -33,6 +33,7 @@ yum install psmisc -y
 yum install sssd -y
 yum install unzip -y
 yum install zip -y
+yum install zstd -y
 
 yum install bc -y
 yum install compat-libcap1.x86_64 -y
