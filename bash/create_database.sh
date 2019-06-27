@@ -15,7 +15,7 @@ echo ''
 echo 'Memory (in MB):'
 read MEMORY
 echo ''
-PASSWORD=$( < /dev/urandom tr -dc A-Za-z_+=.: | head -c1 )$( < /dev/urandom tr -dc A-Za-z0-9_+=.: | head -c17 )
+PASSWORD=$( < /dev/urandom tr -dc A-Za-z | head -c1 )$( < /dev/urandom tr -dc A-Za-z0-9_+=.: | head -c17 )
 echo 'Power User (SYS/SYSTEM/DBSNMP) Password: '$PASSWORD
 echo ''
 
