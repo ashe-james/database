@@ -4,17 +4,27 @@ ORACLE_HOME=/u01/app/oracle/product/12.2.0.1/db
 
 STAGE=$HOME
 
-echo 'Database FQDN:'
-read FQDN
-echo ''
+FQDN=""
+while [[ $FQDN = "" ]];do
+    echo 'Database FQDN:'
+    read FQDN
+    echo ''
+done
+
 SID=$( echo $FQDN | cut -d '.' -f1 | tr '[:upper:]' '[:lower:]' )
 DOMAIN=$( echo $FQDN | cut -d '.' -f2- | tr '[:upper:]' '[:lower:]' )
 echo Database SID: $SID
 echo Database DOMAIN: $DOMAIN
 echo ''
-echo 'Memory (in MB):'
-read MEMORY
-echo ''
+
+MEMORY=""
+
+while [[ $MEMORY = "" ]]; do
+    echo 'Memory (in MB):'
+    read MEMORY
+    echo ''
+done
+
 PASSWORD=$( < /dev/urandom tr -dc A-Za-z | head -c1 )$( < /dev/urandom tr -dc A-Za-z0-9_+=.: | head -c17 )
 echo 'Power User (SYS/SYSTEM/DBSNMP) Password: '$PASSWORD
 echo ''

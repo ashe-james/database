@@ -1,10 +1,8 @@
-#  Uses /backup (sdc) snap: snap-0e5b6766079dba4e8
-
 #  Variables
 
 GRID_HOME=/u01/app/grid/12.2.0.1
 ORACLE_HOME=/u01/app/oracle/product/12.2.0.1/db
-STAGE=/backup
+STAGE=/dbshare/software/12.2.0.1
 
 
 #  grid infrastructure
