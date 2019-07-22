@@ -21,7 +21,7 @@ fi
 
 mv $GRID_HOME/OPatch $GRID_HOME/OPatch_$( date '+%Y%m%d' )
 unzip -o $STAGE/p6880880_122010_Linux-x86-64.zip -d $GRID_HOME
-read -p "Execute the following as ROOT: $GRID_HOME/OPatch/opatchauto apply $STAGE/$PSU_grid -oh $GRID_HOME"
+$GRID_HOME/gridSetup.sh -applyPSU $STAGE/$PSU_grid
 
 mv $ORACLE_HOME/OPatch $ORACLE_HOME/OPatch_$( date '+%Y%m%d' )
 unzip -o $STAGE/p6880880_122010_Linux-x86-64.zip -d $ORACLE_HOME

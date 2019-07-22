@@ -4,6 +4,10 @@ GRID_HOME=/u01/app/grid/12.2.0.1
 ORACLE_HOME=/u01/app/oracle/product/12.2.0.1/db
 STAGE=/dbshare/software/12.2.0.1
 
+PSU_grid=29708786
+PSU_db=29708381
+PSU_java=29249637
+
 
 #  grid infrastructure
 
@@ -56,6 +60,8 @@ CHANGEARRAY=(
 )
 
 DB_RSP=$STAGE_db/response/db_install.rsp
+cp $DB_RSP $ORACLE_HOME
+DB_RSP=$ORACLE_HOME/db_install.rsp
 
 for C in "${CHANGEARRAY[@]}"; do 
         O=$( echo $C | cut -d '=' -f1 )=
@@ -66,3 +72,27 @@ for C in "${CHANGEARRAY[@]}"; do
 done
 
 $STAGE_db/runInstaller -silent -responseFile $DB_RSP
+
+
+#  patching
+
+if [[ ! -d $STAGE/$PSU_grid ]]; then
+    unzip -o $STAGE/p${PSU_grid}_122010_Linux-x86-64.zip -d $STAGE
+fi
+
+if [[ ! -d $STAGE/$PSU_java ]]; then
+    unzip -o $STAGE/p${PSU_java}_122010_Linux-x86-64.zip -d $STAGE
+fi
+
+mv $GRID_HOME/OPatch $GRID_HOME/OPatch_$( date '+%Y%m%d' )
+unzip -o $STAGE/p6880880_122010_Linux-x86-64.zip -d $GRID_HOME
+$GRID_HOME/gridSetup.sh -silent -applyPSU $STAGE/$PSU_grid
+
+mv $ORACLE_HOME/OPatch $ORACLE_HOME/OPatch_$( date '+%Y%m%d' )
+unzip -o $STAGE/p6880880_122010_Linux-x86-64.zip -d $ORACLE_HOME
+
+export PATH=$ORACLE_HOME/OPatch:$PATH
+cd $STAGE/$PSU_grid/$PSU_db
+opatch apply -silent
+cd $STAGE/$PSU_java
+opatch apply -silent
