@@ -60,8 +60,8 @@ CHANGEARRAY=(
 )
 
 DB_RSP=$STAGE_db/response/db_install.rsp
-cp $DB_RSP $ORACLE_HOME
-DB_RSP=$ORACLE_HOME/db_install.rsp
+cp $DB_RSP $STAGE
+DB_RSP=$STAGE/db_install.rsp
 
 for C in "${CHANGEARRAY[@]}"; do 
         O=$( echo $C | cut -d '=' -f1 )=
