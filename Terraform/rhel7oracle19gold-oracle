@@ -1,16 +1,16 @@
 #  Variables
 
-GRID_HOME=/u01/app/grid/12.2.0.1
-ORACLE_HOME=/u01/app/oracle/product/12.2.0.1/db
-GRID_STAGE=/dbshare/software/12.2.0.1
-ORACLE_STAGE=/dbshare/software/12.2.0.1
+GRID_HOME=/u01/app/grid/19.0.0
+ORACLE_HOME=/u01/app/oracle/product/19.0.0/db
+GRID_STAGE=/dbshare/software/19.0.0
+ORACLE_STAGE=/dbshare/software/19.0.0
 
 
 #  grid infrastructure
 
 mkdir -p $GRID_HOME
 
-unzip $GRID_STAGE/linuxx64_12201_grid_home.zip -d $GRID_HOME
+unzip $GRID_STAGE/LINUX.X64_193000_grid_home.zip -d $GRID_HOME
 
 CHANGEARRAY=(
     INVENTORY_LOCATION=/u01/app/oraInventory
@@ -39,7 +39,7 @@ $GRID_HOME/gridSetup.sh -silent -responseFile $GRID_RSP
 
 mkdir -p $ORACLE_HOME
 
-STAGE_db=$ORACLE_STAGE/database
+unzip $ORACLE_STAGE/LINUX.X64_193000_db_home.zip -d $ORACLE_HOME
 
 CHANGEARRAY=(
     oracle.install.option=INSTALL_DB_SWONLY
@@ -56,9 +56,7 @@ CHANGEARRAY=(
     oracle.install.db.OSRACDBA_GROUP=dba
 )
 
-DB_RSP=$STAGE_db/response/db_install.rsp
-cp $DB_RSP $ORACLE_STAGE
-DB_RSP=$ORACLE_STAGE/db_install.rsp
+DB_RSP=$ORACLE_HOME/install/response/db_install.rsp
 
 for C in "${CHANGEARRAY[@]}"; do 
         O=$( echo $C | cut -d '=' -f1 )=
@@ -68,4 +66,4 @@ for C in "${CHANGEARRAY[@]}"; do
 	fi
 done
 
-$STAGE_db/runInstaller -silent -responseFile $DB_RSP
+$ORACLE_HOME/runInstaller -silent -responseFile $DB_RSP
