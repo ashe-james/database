@@ -4,6 +4,11 @@ GRID_HOME=/u01/app/grid/19.0.0
 ORACLE_HOME=/u01/app/oracle/product/19.0.0/db
 GRID_STAGE=/dbshare/software/19.0.0
 ORACLE_STAGE=/dbshare/software/19.0.0
+PATCH_STAGE=/dbshare/software/19.0.0
+
+PSU_grid=31305339
+PSU_db=31281355
+PSU_java=31219897
 
 
 #  grid infrastructure
@@ -32,7 +37,7 @@ for C in "${CHANGEARRAY[@]}"; do
 	fi
 done
 
-$GRID_HOME/gridSetup.sh -silent -responseFile $GRID_RSP
+$GRID_HOME/gridSetup.sh -silent -applyRU $PATCH_STAGE/$PSU_grid -responseFile $GRID_RSP
 
 
 #  database
@@ -67,3 +72,26 @@ for C in "${CHANGEARRAY[@]}"; do
 done
 
 $ORACLE_HOME/runInstaller -silent -responseFile $DB_RSP
+
+
+#  patching
+
+if [[ ! -d $PATCH_STAGE/$PSU_grid ]]; then
+    unzip -o $PATCH_STAGE/p${PSU_grid}_190000_Linux-x86-64.zip -d $PATCH_STAGE
+fi
+
+if [[ ! -d $PATCH_STAGE/$PSU_java ]]; then
+    unzip -o $PATCH_STAGE/p${PSU_java}_190000_Linux-x86-64.zip -d $PATCH_STAGE
+fi
+
+mv $GRID_HOME/OPatch $GRID_HOME/OPatch_$( date '+%Y%m%d' )
+unzip -o $PATCH_STAGE/p6880880_190000_Linux-x86-64.zip -d $GRID_HOME
+
+mv $ORACLE_HOME/OPatch $ORACLE_HOME/OPatch_$( date '+%Y%m%d' )
+unzip -o $PATCH_STAGE/p6880880_190000_Linux-x86-64.zip -d $ORACLE_HOME
+
+export PATH=$ORACLE_HOME/OPatch:$PATH
+cd $PATCH_STAGE/$PSU_grid/$PSU_db
+opatch apply -silent
+cd $PATCH_STAGE/$PSU_java
+opatch apply -silent
