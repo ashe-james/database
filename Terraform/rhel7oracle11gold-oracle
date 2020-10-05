@@ -4,9 +4,8 @@ ORACLE_HOME=/u01/app/oracle/product/11.2.0.4/db
 ORACLE_STAGE=/dbshare/software/11.2.0.4/database
 PATCH_STAGE=/dbshare/software/11.2.0.4
 
-PSU_grid=30783890/30805461
-PSU_db=30670774
-PSU_java=30783890/30805543
+PSU_db=31326410/31305209/31103343
+PSU_java=31326410/31219953
 
 
 #  database
@@ -39,22 +38,24 @@ done
 
 $ORACLE_STAGE/runInstaller -silent -responseFile $DB_RSP
 
+read -p "Press [RETURN] to patch Oracle Database"
+
 
 #  patching
 
-if [[ ! -d $PATCH_STAGE/$PSU_grid ]]; then
-    unzip -o $PATCH_STAGE/p${PSU_grid}_112000_Linux-x86-64.zip -d $PATCH_STAGE
+if [[ ! -d $PATCH_STAGE/$( echo ${PSU_db} | cut -d "/" -f1 ) ]]; then
+    unzip -o $PATCH_STAGE/p$( echo ${PSU_db} | cut -d "/" -f1 )_112000_Linux-x86-64.zip -d $PATCH_STAGE
 fi
 
-if [[ ! -d $PATCH_STAGE/$PSU_java ]]; then
-    unzip -o $PATCH_STAGE/p${PSU_java}_112000_Linux-x86-64.zip -d $PATCH_STAGE
+if [[ ! -d $PATCH_STAGE/$( echo ${PSU_java} | cut -d "/" -f1 ) ]]; then
+    unzip -o $PATCH_STAGE/p$( echo ${PSU_java} | cut -d "/" -f1 )_112000_Linux-x86-64.zip -d $PATCH_STAGE
 fi
 
 mv $ORACLE_HOME/OPatch $ORACLE_HOME/OPatch_$( date '+%Y%m%d' )
 unzip -o $PATCH_STAGE/p6880880_112000_Linux-x86-64.zip -d $ORACLE_HOME
 
 export PATH=$ORACLE_HOME/OPatch:$PATH
-cd $PATCH_STAGE/$PSU_grid/$PSU_db
+cd $PATCH_STAGE/$PSU_db
 opatch apply -silent
 cd $PATCH_STAGE/$PSU_java
 opatch apply -silent
