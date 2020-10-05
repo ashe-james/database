@@ -37,7 +37,7 @@ for C in "${CHANGEARRAY[@]}"; do
 	fi
 done
 
-if [[ ! -d $PATCH_STAGE/( echo ${PSU_grid} | cut -d "/" -f1 ) ]]; then
+if [[ ! -d $PATCH_STAGE/$( echo ${PSU_grid} | cut -d "/" -f1 ) ]]; then
     unzip -o $PATCH_STAGE/p$( echo ${PSU_grid} | cut -d "/" -f1 )_190000_Linux-x86-64.zip -d $PATCH_STAGE
 fi
 
