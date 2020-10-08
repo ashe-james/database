@@ -1,0 +1,70 @@
+GRID_HOME=/u01/app/19.0.0/grid
+ORACLE_HOME=/u01/app/oracle/product/11.2.0.4/db
+
+oracleasm scandisks
+
+$GRID_HOME/bin/crsctl start res ora.cssd -init
+
+echo "GRID_HOME=$GRID_HOME" > /home/oracle/configureASM.sh
+echo "DB_HOME=$ORACLE_HOME" >> /home/oracle/configureASM.sh
+
+echo '
+$GRID_HOME/bin/srvctl add asm
+$GRID_HOME/bin/srvctl start asm
+
+echo "+ASM:$GRID_HOME:N" >> /etc/oratab
+
+. /usr/local/bin/oraenv <<< +ASM
+
+sqlplus /nolog <<EOF
+connect / as sysasm
+alter diskgroup DATA mount;
+alter diskgroup FRA mount;
+create pfile='?/dbs/init+ASM.ora' from memory;
+create spfile='?/dbs/spfile+ASM.ora' from memory;
+EOF
+
+$GRID_HOME/bin/srvctl modify asm -diskstring '/dev/oracleasm/disks/*'
+$GRID_HOME/bin/srvctl modify asm -pwfile $GRID_HOME'/dbs/orapwasm'
+$GRID_HOME/bin/srvctl modify asm -spfile $GRID_HOME'/dbs/spfile+ASM.ora'
+
+$GRID_HOME/bin/crsctl stop has -f
+$GRID_HOME/bin/crsctl start has
+
+while [ $( ps -ef | grep pmon_+ASM | grep -v grep | wc -l ) -eq 0 ]
+do
+	echo "Waiting for +ASM database startup."
+	sleep 10
+done
+
+sqlplus /nolog <<EOF
+connect / as sysasm
+alter system set audit_sys_operations=false scope=spfile;
+EOF
+
+while [ $( ps -ef | grep pmon_+ASM | grep -v grep | wc -l ) -eq 0 ]
+do
+	echo "Waiting for +ASM database startup."
+	sleep 10
+done
+
+$GRID_HOME/bin/crsctl stop has -f
+$GRID_HOME/bin/crsctl start has
+
+DATABASES=$( asmcmd ls +DATA | grep "/" | grep -v "ASM" | sed 's/\///' | sort | tr '[:lower:]' '[:upper:]' )
+DBARRAY=( $DATABASES )
+
+for DB in "${DBARRAY[@]}"; do
+	if [[ "$DB_HOME" = *"11.2.0.4"* ]]; then
+		$DB_HOME/bin/srvctl add database -d $DB -o $DB_HOME -p $DB_HOME/dbs/spfile$DB.ora
+		$DB_HOME/bin/srvctl start database -d $DB
+	else
+		$DB_HOME/bin/srvctl add database -db $DB -oraclehome $DB_HOME -spfile $DB_HOME/dbs/spfile$DB.ora -pwfile $DB_HOME/dbs/orapw$DB.ora
+		$DB_HOME/bin/srvctl start database -db $DB
+	fi
+done
+
+' >> /home/oracle/configureASM.sh
+
+chmod +x /home/oracle/configureASM.sh
+su - oracle /home/oracle/configureASM.sh
