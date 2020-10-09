@@ -20,13 +20,13 @@ sqlplus /nolog <<EOF
 connect / as sysasm
 alter diskgroup DATA mount;
 alter diskgroup FRA mount;
-create pfile='?/dbs/init+ASM.ora' from memory;
-create spfile='?/dbs/spfile+ASM.ora' from memory;
+create pfile='"'"'?/dbs/init+ASM.ora'"'"' from memory;
+create spfile='"'"'?/dbs/spfile+ASM.ora'"'"' from memory;
 EOF
 
-$GRID_HOME/bin/srvctl modify asm -diskstring '/dev/oracleasm/disks/*'
-$GRID_HOME/bin/srvctl modify asm -pwfile $GRID_HOME'/dbs/orapwasm'
-$GRID_HOME/bin/srvctl modify asm -spfile $GRID_HOME'/dbs/spfile+ASM.ora'
+$GRID_HOME/bin/srvctl modify asm -diskstring '"'"'/dev/oracleasm/disks/*'"'"'
+$GRID_HOME/bin/srvctl modify asm -pwfile $GRID_HOME'"'"'/dbs/orapwasm'"'"'
+$GRID_HOME/bin/srvctl modify asm -spfile $GRID_HOME'"'"'/dbs/spfile+ASM.ora'"'"'
 
 $GRID_HOME/bin/crsctl stop has -f
 $GRID_HOME/bin/crsctl start has
@@ -42,16 +42,16 @@ connect / as sysasm
 alter system set audit_sys_operations=false scope=spfile;
 EOF
 
+$GRID_HOME/bin/crsctl stop has -f
+$GRID_HOME/bin/crsctl start has
+
 while [ $( ps -ef | grep pmon_+ASM | grep -v grep | wc -l ) -eq 0 ]
 do
 	echo "Waiting for +ASM database startup."
 	sleep 10
 done
 
-$GRID_HOME/bin/crsctl stop has -f
-$GRID_HOME/bin/crsctl start has
-
-DATABASES=$( asmcmd ls +DATA | grep "/" | grep -v "ASM" | sed 's/\///' | sort | tr '[:lower:]' '[:upper:]' )
+DATABASES=$( $GRID_HOME/bin/asmcmd ls DATA | grep "/" | grep -v "ASM" | sed '"'"'s/\///'"'"' | sort | tr '"'"'[:upper:]'"'"' '"'"'[:lower:]'"'"' )
 DBARRAY=( $DATABASES )
 
 for DB in "${DBARRAY[@]}"; do
