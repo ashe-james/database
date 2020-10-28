@@ -1,0 +1,25 @@
+aws ec2 create-volume --snapshot-id snap-0e5546a930dc35dfe --availability-zone us-gov-west-1a
+aws ec2 create-volume --snapshot-id snap-0dba8145ebbc3ca31 --availability-zone us-gov-west-1a
+aws ec2 create-volume --snapshot-id snap-040c7d1149b57e7e1 --availability-zone us-gov-west-1a
+aws ec2 create-volume --snapshot-id snap-0198d144d73580122 --availability-zone us-gov-west-1a
+aws ec2 create-volume --snapshot-id snap-0291ce545aa2adc70 --availability-zone us-gov-west-1a
+aws ec2 create-volume --snapshot-id snap-06b734661b4c1a778 --availability-zone us-gov-west-1a
+
+aws ec2 attach-volume --volume-id vol-018d93213b1ff8562 --instance-id i-05ecb6333f7837e9e --device /dev/sdd
+aws ec2 attach-volume --volume-id vol-0fbdb8fbd4725394d --instance-id i-05ecb6333f7837e9e --device /dev/sde
+aws ec2 attach-volume --volume-id vol-092bab4edf2f8d9a8 --instance-id i-05ecb6333f7837e9e --device /dev/sdf
+aws ec2 attach-volume --volume-id vol-03f7230de9e848460 --instance-id i-05ecb6333f7837e9e --device /dev/sdg
+aws ec2 attach-volume --volume-id vol-04654a43f7eed55ac --instance-id i-05ecb6333f7837e9e --device /dev/sdh
+aws ec2 attach-volume --volume-id vol-0fa6b3dd89d87a297 --instance-id i-05ecb6333f7837e9e --device /dev/sdi
+
+
+sqlplus / as sysasm
+alter user sys identified by "<<password>>"
+    password must have 1 letter, 1 digit, 1 special character
+exit
+
+orapwd file=/u01/app/19.0.0/grid/dbs/orapwasm force=y
+sqlplus / as sysasm
+create user asmsnmp identified by "<<password>>"
+    password must have 1 letter, 1 digit, 1 special character
+grant sysdba to asmsnmp;

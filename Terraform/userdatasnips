@@ -12,7 +12,7 @@ grub2-mkconfig -o /boot/grub2/grub.cfg
 : '
 #  disk i/o scheduling
 
-echo "ACTION==\"add|change\", KERNEL==\"sd[b-z]\", ATTR{queue/rotational}==\"0\", ATTR{queue/scheduler}=\"deadline\"" > /etc/udev/rules.d/60-oracle-schedulers.rules
+echo "ACTION==\"add|change\", KERNEL==\"sd[b-z]\", ATTR{queue/rotational}==\"0\", ATTR{queue/scheduler}=\"mq-deadline\"" > /etc/udev/rules.d/60-oracle-schedulers.rules
 udevadm control --reload-rules
 '
 

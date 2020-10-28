@@ -1,0 +1,10 @@
+sqlplus / as sysasm
+alter user sys identified by "<<password>>"
+    password must have 1 letter, 1 digit, 1 special character
+exit
+
+orapwd file=/u01/app/19.0.0/grid/dbs/orapwasm force=y
+sqlplus / as sysasm
+create user asmsnmp identified by "<<password>>"
+    password must have 1 letter, 1 digit, 1 special character
+grant sysdba to asmsnmp;

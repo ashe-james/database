@@ -1,0 +1,41 @@
+INSTANCE_ID=$(curl -s "http://169.254.169.254/latest/meta-data/instance-id")
+
+#  symlink NVMe to block
+AWSVOLUMES=$( aws ec2 describe-volumes --filters "Name=attachment.instance-id,Values=$INSTANCE_ID" )
+
+for i in `seq 0 26`; do
+    BLOCK_DEVICE="/dev/nvme${i}n1"
+
+    if [ -e $BLOCK_DEVICE ]; then
+
+        VOLUME_ID=$( nvme id-ctrl $BLOCK_DEVICE | grep sn | awk '{ print $3 }' | sed -r -e 's/^.{3}/&-/' )
+
+        MAPPING_DEVICE=$( echo $AWSVOLUMES | jq -r --arg V "$VOLUME_ID" '.[][] | .Attachments[] | select(.VolumeId == $V) | .Device' )
+
+        if [[ "$MAPPING_DEVICE" != /dev/* ]]; then
+            MAPPING_DEVICE="/dev/$MAPPING_DEVICE"
+        fi
+
+        if [ -e $MAPPING_DEVICE ]; then
+            echo "path exists: $MAPPING_DEVICE"
+
+        else
+            echo "symlink created: $BLOCK_DEVICE to $MAPPING_DEVICE"
+            ln -s $BLOCK_DEVICE $MAPPING_DEVICE
+        fi
+
+    fi
+done
+
+DEVICE_sdc=$( readlink -f /dev/sdc )
+P=$( lsblk -nl $DEVICE_sdc -o NAME,TYPE | grep disk | cut -d ' ' -f1 )
+
+if [ -n "$P" ]; then
+        mkdir /backup
+        
+        PARTITION="/dev/$P"
+
+        UUID=$( blkid | grep $PARTITION | awk -F' UUID=\"' '{ print $2 }' | awk -F"\"" '{ print $1 }' )
+        echo "UUID=$UUID /backup                 ext4    defaults,nofail 0 2" >> /etc/fstab
+        mount -a
+fi
