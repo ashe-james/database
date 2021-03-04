@@ -1,33 +1,16 @@
 #  Variables
 
-ORACLE_HOME=/u01/app/oracle/product/12.2.0.1/db
-
+ORACLE_BASE=/u01/app/oracle
+ORACLE_HOME=/u01/app/oracle/product/19.0.0/db
 STAGE=$HOME
 
-FQDN=""
-while [[ $FQDN = "" ]];do
-    echo 'Database FQDN:'
-    read FQDN
-    echo ''
-done
+read -p "FQDN: " FQDN
+read -p "MEMORY: " MEMORY
 
 SID=$( echo $FQDN | cut -d '.' -f1 | tr '[:upper:]' '[:lower:]' )
 DOMAIN=$( echo $FQDN | cut -d '.' -f2- | tr '[:upper:]' '[:lower:]' )
-echo Database SID: $SID
-echo Database DOMAIN: $DOMAIN
-echo ''
-
-MEMORY=""
-
-while [[ $MEMORY = "" ]]; do
-    echo 'Memory (in MB):'
-    read MEMORY
-    echo ''
-done
-
 PASSWORD=$( < /dev/urandom tr -dc A-Za-z | head -c1 )$( < /dev/urandom tr -dc A-Za-z0-9_+=.: | head -c17 )
 echo 'Power User (SYS/SYSTEM/DBSNMP) Password: '$PASSWORD
-echo ''
 
 #  database
 
@@ -41,11 +24,9 @@ CHANGEARRAY=(
     sysPassword=$PASSWORD
     systemPassword=$PASSWORD
     dbsnmpPassword=$PASSWORD
-    datafileDestination=+DATA
-    recoveryAreaDestination=+FRA
-    storageType=ASM
-    diskGroupName=DATA
-    recoveryGroupName=FRA
+    datafileDestination=/u01/app/oracle/oradata
+    recoveryAreaDestination=/u01/app/oracle/oradata
+    storageType=FS
     characterSet=AL32UTF8
     totalMemory=$MEMORY
 )
